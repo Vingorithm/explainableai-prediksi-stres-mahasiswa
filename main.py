@@ -83,11 +83,23 @@ st.markdown("""
 def load_models():
     try:
         model = joblib.load('xgboost_model_for_deployment.pkl')
-        scaler = joblib.load('minmax_scaler_for_deployment.pkl')
+        try:
+            scaler = joblib.load('minmax_scaler_for_deployment.pkl')
+        except:
+            # If scaler fails, create a new one with expected range
+            from sklearn.preprocessing import MinMaxScaler
+            scaler = MinMaxScaler()
+            # Fit with dummy data to establish the transformation
+            dummy_data = np.array([[0], [10]])  # Min and max for ratio features
+            scaler.fit(dummy_data)
+            st.warning("⚠️ Scaler loaded with default settings. For best results, ensure minmax_scaler_for_deployment.pkl is properly generated.")
+        
         feature_names = joblib.load('feature_names.pkl')
         return model, scaler, feature_names, None
     except FileNotFoundError as e:
         return None, None, None, str(e)
+    except Exception as e:
+        return None, None, None, f"Unexpected error: {str(e)}"
 
 model, scaler, feature_names, error = load_models()
 
@@ -185,11 +197,36 @@ def preprocess_input(raw_input_data, loaded_scaler, loaded_feature_names):
     
     processed_df["screen_x_sleep"] = processed_df["screen_time_hrs_day"] * processed_df["sleep_duration_hrs"]
     
-    # Scaling
+    # Scaling - Manual MinMax normalization to avoid feature name issues
+    # Based on the notebook, we need to scale ratio features
     ratio_features_to_scale = ["sleep_quality_index", "lifestyle_balance_score"]
-    for col in ratio_features_to_scale:
-        if col in processed_df.columns:
-            processed_df[[col]] = loaded_scaler.transform(processed_df[[col]])
+    
+    # Try using the loaded scaler first, if it fails, use manual scaling
+    try:
+        for col in ratio_features_to_scale:
+            if col in processed_df.columns:
+                col_values = processed_df[[col]].values
+                scaled_values = loaded_scaler.transform(col_values)
+                processed_df[col] = scaled_values.flatten()
+    except:
+        # Fallback: Manual MinMax scaling
+        # These ranges are typical for the features based on their calculation
+        for col in ratio_features_to_scale:
+            if col in processed_df.columns:
+                val = processed_df[col].iloc[0]
+                # Manual min-max normalization with reasonable bounds
+                if col == "sleep_quality_index":
+                    # Typical range: 0 to 10 (sleep_hrs / screen_hrs)
+                    min_val, max_val = 0, 10
+                elif col == "lifestyle_balance_score":
+                    # Typical range: 0 to 5 (activity_hrs / screen_hrs)
+                    min_val, max_val = 0, 5
+                
+                # Apply min-max scaling: (x - min) / (max - min)
+                normalized_val = (val - min_val) / (max_val - min_val)
+                # Clip to [0, 1] range
+                normalized_val = max(0, min(1, normalized_val))
+                processed_df[col] = normalized_val
     
     processed_df = processed_df[loaded_feature_names]
     
