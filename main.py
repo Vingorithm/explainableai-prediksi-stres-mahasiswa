@@ -140,11 +140,11 @@ def preprocess_input(raw_input_data, loaded_scaler, loaded_feature_names):
     # Education Level (Simplified then One-Hot Encoded)
     def simplify_education(level):
         if "Class" in level:
-            return "high_school"
+            return "High School"
         elif level in ["BTech", "BA", "BSc"]:
-            return "undergraduate"
+            return "Undergraduate"
         else:
-            return "postgraduate"
+            return "Postgraduate"
     
     if 'education_level' in input_df.columns:
         edu_simplified_category = simplify_education(input_df['education_level'].iloc[0])
@@ -170,15 +170,15 @@ def preprocess_input(raw_input_data, loaded_scaler, loaded_feature_names):
     
     # Exam Anxiety x Education (Interaction)
     edu_status_for_interaction = ""
-    if processed_df['edu_undergraduate'].iloc[0] == 1:
+    if 'edu_Undergraduate' in processed_df.columns and processed_df['edu_Undergraduate'].iloc[0] == 1:
         edu_status_for_interaction = "UG"
-    elif processed_df['edu_high_school'].iloc[0] == 1:
+    elif 'edu_High School' in processed_df.columns and processed_df['edu_High School'].iloc[0] == 1:
         edu_status_for_interaction = "HS"
-    elif processed_df['edu_postgraduate'].iloc[0] == 1:
+    elif 'edu_Postgraduate' in processed_df.columns and processed_df['edu_Postgraduate'].iloc[0] == 1:
         edu_status_for_interaction = "PG"
     
     anxiety_status = "Anxious" if processed_df['anxious_before_exams'].iloc[0] == 1 else "Calm"
-    combined_feature_name = f'anxedu_{anxiety_status}_{edu_status_for_interaction}'.lower()
+    combined_feature_name = f'anxEdu_{anxiety_status}_{edu_status_for_interaction}'
     
     if combined_feature_name in processed_df.columns:
         processed_df[combined_feature_name] = 1
