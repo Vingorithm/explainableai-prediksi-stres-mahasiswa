@@ -104,8 +104,8 @@ def load_models():
 model, scaler, feature_names, error = load_models()
 
 # --- Title ---
-st.markdown("<h1>🧠 Student Stress Level Predictor</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: white; font-size: 1.2rem;'>Analyze stress levels using AI-powered XGBoost model with lifestyle factors</p>", unsafe_allow_html=True)
+st.markdown("<h1>🧠 Explainable AI untuk Prediksi Stress Mahasiswa</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: white; font-size: 1.2rem;'>Analyze stress levels using AI-powered model with lifestyle & academic factors</p>", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
 if error:
@@ -234,7 +234,7 @@ def preprocess_input(raw_input_data, loaded_scaler, loaded_feature_names):
 
 # --- Sidebar for Input ---
 with st.sidebar:
-    st.markdown("## 📝 Input Student Data")
+    st.markdown("## 📝 Masukan Data Mahasiswa")
     st.markdown("---")
     
     # Personal Information
@@ -576,7 +576,7 @@ st.markdown("""
     <div style='text-align: center; color: white; padding: 1rem;'>
         <p>🤖 Powered by XGBoost Machine Learning Model</p>
         <p style='font-size: 0.9rem; opacity: 0.8;'>
-            Built with ❤️ using Streamlit | Model trained on student mental health dataset
+            By Kevin Philips Tanamas | Model trained on student mental health dataset
         </p>
     </div>
 """, unsafe_allow_html=True)
